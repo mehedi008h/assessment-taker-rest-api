@@ -43,4 +43,9 @@ public class Question {
     @Transient
     @Column(name = "given_answer")
     private String givenAnswer;
+
+    // relation mapping
+    // many-to-one relation between quiz
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Assessment assessment;
 }

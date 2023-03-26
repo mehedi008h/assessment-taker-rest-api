@@ -1,5 +1,6 @@
 package com.devmehedi.assessment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -7,13 +8,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
-@Table(name = "quiz")
-@Entity(name = "Quiz")
-public class Quiz {
+@Table(name = "assessment")
+@Entity(name = "Assessment")
+public class Assessment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, updatable = false)
@@ -32,4 +36,19 @@ public class Quiz {
     private String imageUrl;
     private boolean active = false;
     private int totalTaken;
+
+    // relation mapping
+    // many-to-one relation between category
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Category category;
+
+    // one-to-many relation between question
+    @OneToMany(
+            mappedBy = "quiz",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private Set<Question> questions = new HashSet<>();
 }

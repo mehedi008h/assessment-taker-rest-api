@@ -1,11 +1,15 @@
 package com.devmehedi.assessment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,4 +29,15 @@ public class Category {
     @NotBlank(message = "Category description is a required!")
     @Column(length = 5000)
     private String description;
+
+    // relation mapping
+    // one-to-many relation between quiz
+    @OneToMany(
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            fetch = FetchType.LAZY,
+            mappedBy = "category",
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private Set<Assessment> assessments = new LinkedHashSet<>();
 }
