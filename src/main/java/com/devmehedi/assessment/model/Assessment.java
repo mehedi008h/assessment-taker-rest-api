@@ -44,7 +44,7 @@ public class Assessment {
 
     // one-to-many relation between question
     @OneToMany(
-            mappedBy = "quiz",
+            mappedBy = "assessment",
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval = true
