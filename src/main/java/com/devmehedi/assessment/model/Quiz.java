@@ -16,8 +16,9 @@ import lombok.Setter;
 public class Quiz {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, updatable = false)
     private Long id;
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false, name = "quiz_identifier")
     private String quizIdentifier;
     @NotBlank(message = "Quiz title is a required!")
     private String title;
@@ -27,6 +28,8 @@ public class Quiz {
     @NotBlank(message = "Quiz time is a required!")
     private String time;
     private int attempt;
+    @Column(name = "image_url")
     private String imageUrl;
     private boolean active = false;
+    private int totalTaken;
 }
