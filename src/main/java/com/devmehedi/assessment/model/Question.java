@@ -24,17 +24,23 @@ public class Question {
     @NotBlank(message = "Question content is required!")
     private String content;
     private String image;
+    @Column(name = "option_1")
     @NotBlank(message = "Question option4 is required!")
     private String option1;
+    @Column(name = "option_2")
     @NotBlank(message = "Question option4 is required!")
     private String option2;
+    @Column(name = "option_3")
     @NotBlank(message = "Question option4 is required!")
     private String option3;
+    @Column(name = "option_4")
     @NotBlank(message = "Question option4 is required!")
     private String option4;
+    @Column(name = "option_5")
     private String option5;
     @NotBlank(message = "Question answer is required!")
     private String answer;
     @Transient
+    @Column(name = "given_answer")
     private String givenAnswer;
 }
