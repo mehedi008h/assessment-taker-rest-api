@@ -11,15 +11,22 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-@Table(name = "category")
-@Entity(name = "Category")
-public class Category {
+@Table(name = "quiz")
+@Entity(name = "Quiz")
+public class Quiz {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank(message = "Category title is a required!")
+    @Column(updatable = false, nullable = false)
+    private String quizIdentifier;
+    @NotBlank(message = "Quiz title is a required!")
     private String title;
-    @NotBlank(message = "Category description is a required!")
+    @NotBlank(message = "Quiz description is a required!")
     @Column(length = 5000)
     private String description;
+    @NotBlank(message = "Quiz time is a required!")
+    private String time;
+    private int attempt;
+    private String imageUrl;
+    private boolean active = false;
 }
