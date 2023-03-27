@@ -5,10 +5,13 @@ import com.devmehedi.assessment.exception.model.CategoryNotFoundException;
 import com.devmehedi.assessment.model.Category;
 import com.devmehedi.assessment.model.HttpResponse;
 import com.devmehedi.assessment.service.CategoryService;
+import com.devmehedi.assessment.service.ValidationErrorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -21,15 +24,21 @@ import static org.springframework.http.HttpStatus.*;
 public class CategoryController extends ExceptionHandling {
     private static final String CATEGORY_DELETED_SUCCESSFULLY = "Category Deleted Successfully";
     private CategoryService categoryService;
+    private ValidationErrorService validationErrorService;
 
     @Autowired
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, ValidationErrorService validationErrorService) {
         this.categoryService = categoryService;
+        this.validationErrorService = validationErrorService;
     }
 
     // create category
     @PostMapping
-    public ResponseEntity<Category> createCategory(@RequestBody Category category) {
+    public ResponseEntity<?> createCategory(@Valid @RequestBody Category category, BindingResult result) {
+        // validate field error
+        ResponseEntity<?> errorMap = validationErrorService.ValidationService(result);
+        if (errorMap != null) return response(BAD_REQUEST, errorMap.getBody().toString());
+
         Category newCategory = categoryService.addCategory(category);
         return new ResponseEntity<>(newCategory, OK);
     }
