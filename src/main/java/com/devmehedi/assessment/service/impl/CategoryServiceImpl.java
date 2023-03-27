@@ -1,5 +1,6 @@
 package com.devmehedi.assessment.service.impl;
 
+import com.devmehedi.assessment.exception.model.CategoryNotFoundException;
 import com.devmehedi.assessment.model.Category;
 import com.devmehedi.assessment.repository.CategoryRepository;
 import com.devmehedi.assessment.service.CategoryService;
@@ -30,9 +31,14 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.save(category);
     }
 
+    // update category
     @Override
-    public Category updateCategory(Category category) {
-        return null;
+    public Category updateCategory(Category category) throws CategoryNotFoundException {
+        Category updateCategory = checkCategoryExist(category.getCategoryIdentifier());
+        updateCategory.setTitle(category.getTitle());
+        updateCategory.setDescription(category.getDescription());
+        categoryRepository.save(updateCategory);
+        return updateCategory;
     }
 
     @Override
@@ -50,8 +56,24 @@ public class CategoryServiceImpl implements CategoryService {
 
     }
 
+    @Override
+    public Category findCategoryByIdentifier(String categoryIdentifier) {
+        return categoryRepository.findCategoryByCategoryIdentifier(categoryIdentifier);
+    }
+
     // generate random string
     private String generateCategoryId() {
         return RandomStringUtils.randomNumeric(10);
+    }
+
+    // check category exist or not
+    private Category checkCategoryExist(String categoryIdentifier) throws CategoryNotFoundException {
+        Category updateCategory = findCategoryByIdentifier(categoryIdentifier);
+        // check category exist or not
+        if (updateCategory == null) {
+            throw new CategoryNotFoundException("Category not found with this identifier " + categoryIdentifier);
+        }
+
+        return updateCategory;
     }
 }

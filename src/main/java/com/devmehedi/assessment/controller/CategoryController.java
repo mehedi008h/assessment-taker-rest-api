@@ -1,5 +1,6 @@
 package com.devmehedi.assessment.controller;
 
+import com.devmehedi.assessment.exception.ExceptionHandling;
 import com.devmehedi.assessment.model.Category;
 import com.devmehedi.assessment.service.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 @RequestMapping(value = "/api/v1/category")
 @RestController
-public class CategoryController {
+public class CategoryController extends ExceptionHandling {
     private CategoryService categoryService;
 
     @Autowired
