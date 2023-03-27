@@ -10,6 +10,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -41,24 +42,24 @@ public class CategoryServiceImpl implements CategoryService {
         return updateCategory;
     }
 
+    // get all category
     @Override
     public Set<Category> getCategories() {
-        return null;
+        return new LinkedHashSet<>(categoryRepository.findAll());
     }
 
+    // get single category
     @Override
-    public Category getCategory(Long categoryId) {
-        return null;
+    public Category getCategory(String categoryIdentifier) throws CategoryNotFoundException {
+        Category category = checkCategoryExist(categoryIdentifier);
+        return category;
     }
 
+    // delete category
     @Override
-    public void deleteCategory(Long categoryId) {
-
-    }
-
-    @Override
-    public Category findCategoryByIdentifier(String categoryIdentifier) {
-        return categoryRepository.findCategoryByCategoryIdentifier(categoryIdentifier);
+    public void deleteCategory(String categoryIdentifier) throws CategoryNotFoundException {
+        Category category = checkCategoryExist(categoryIdentifier);
+        categoryRepository.deleteById(category.getId());
     }
 
     // generate random string
@@ -68,12 +69,11 @@ public class CategoryServiceImpl implements CategoryService {
 
     // check category exist or not
     private Category checkCategoryExist(String categoryIdentifier) throws CategoryNotFoundException {
-        Category updateCategory = findCategoryByIdentifier(categoryIdentifier);
-        // check category exist or not
-        if (updateCategory == null) {
+        Category category = categoryRepository.findCategoryByCategoryIdentifier(categoryIdentifier);
+        // check & throw exception category not found
+        if (category == null) {
             throw new CategoryNotFoundException("Category not found with this identifier " + categoryIdentifier);
         }
-
-        return updateCategory;
+        return category;
     }
 }

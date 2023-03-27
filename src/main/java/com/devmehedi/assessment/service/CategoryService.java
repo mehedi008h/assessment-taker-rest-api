@@ -9,7 +9,6 @@ public interface CategoryService {
     public Category addCategory(Category category);
     public Category updateCategory(Category category) throws CategoryNotFoundException;
     public Set<Category> getCategories();
-    public Category getCategory (Long categoryId);
-    public void deleteCategory(Long categoryId);
-    public Category findCategoryByIdentifier(String categoryIdentifier);
+    public Category getCategory (String categoryIdentifier) throws CategoryNotFoundException;
+    public void deleteCategory(String categoryIdentifier) throws CategoryNotFoundException;
 }
