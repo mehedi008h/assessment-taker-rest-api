@@ -49,7 +49,7 @@ public class CategoryController extends ExceptionHandling {
     }
 
     // update category by category identifier
-    @PostMapping("/{categoryIdentifier}")
+    @PutMapping
     public ResponseEntity<Category> updateCategory(@RequestBody Category category) throws CategoryNotFoundException {
         Category updateCategory = categoryService.updateCategory(category);
         return new ResponseEntity<>(updateCategory, OK);
