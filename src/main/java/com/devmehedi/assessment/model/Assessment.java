@@ -22,14 +22,14 @@ public class Assessment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, updatable = false)
     private Long id;
-    @Column(updatable = false, nullable = false, name = "quiz_identifier")
-    private String quizIdentifier;
-    @NotBlank(message = "Quiz title is a required!")
+    @Column(updatable = false, nullable = false, name = "assessment_identifier")
+    private String assessmentIdentifier;
+    @NotBlank(message = "Assessment title is a required!")
     private String title;
-    @NotBlank(message = "Quiz description is a required!")
+    @NotBlank(message = "Assessment description is a required!")
     @Column(length = 5000)
     private String description;
-    @NotBlank(message = "Quiz time is a required!")
+    @NotBlank(message = "Assessment time is a required!")
     private String time;
     private int attempt;
     @Column(name = "image_url")

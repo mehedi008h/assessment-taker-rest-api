@@ -1,7 +1,7 @@
 package com.devmehedi.assessment.controller;
 
 import com.devmehedi.assessment.exception.ExceptionHandling;
-import com.devmehedi.assessment.exception.model.CategoryNotFoundException;
+import com.devmehedi.assessment.exception.model.NotFoundException;
 import com.devmehedi.assessment.model.Category;
 import com.devmehedi.assessment.model.HttpResponse;
 import com.devmehedi.assessment.service.CategoryService;
@@ -52,21 +52,21 @@ public class CategoryController extends ExceptionHandling {
 
     // get single category by category identifier
     @GetMapping("/{categoryIdentifier}")
-    public ResponseEntity<Category> getCategory(@PathVariable("categoryIdentifier") String categoryIdentifier) throws CategoryNotFoundException {
+    public ResponseEntity<Category> getCategory(@PathVariable("categoryIdentifier") String categoryIdentifier) throws NotFoundException {
         Category category = categoryService.getCategory(categoryIdentifier);
         return new ResponseEntity<>(category, OK);
     }
 
     // update category by category identifier
     @PutMapping
-    public ResponseEntity<Category> updateCategory(@RequestBody Category category) throws CategoryNotFoundException {
+    public ResponseEntity<Category> updateCategory(@RequestBody Category category) throws NotFoundException {
         Category updateCategory = categoryService.updateCategory(category);
         return new ResponseEntity<>(updateCategory, OK);
     }
 
     // delete category by category identifier
     @DeleteMapping("/{categoryIdentifier}")
-    public ResponseEntity<HttpResponse> deleteCategory(@PathVariable("categoryIdentifier") String categoryIdentifier) throws CategoryNotFoundException {
+    public ResponseEntity<HttpResponse> deleteCategory(@PathVariable("categoryIdentifier") String categoryIdentifier) throws NotFoundException {
         categoryService.deleteCategory(categoryIdentifier);
         return response(OK, CATEGORY_DELETED_SUCCESSFULLY);
     }

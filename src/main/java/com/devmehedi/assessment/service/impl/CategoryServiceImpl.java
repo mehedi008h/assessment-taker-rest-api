@@ -1,6 +1,6 @@
 package com.devmehedi.assessment.service.impl;
 
-import com.devmehedi.assessment.exception.model.CategoryNotFoundException;
+import com.devmehedi.assessment.exception.model.NotFoundException;
 import com.devmehedi.assessment.model.Category;
 import com.devmehedi.assessment.repository.CategoryRepository;
 import com.devmehedi.assessment.service.CategoryService;
@@ -28,13 +28,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category addCategory(Category category) {
         // set category identifier
-        category.setCategoryIdentifier(generateCategoryId());
+        category.setCategoryIdentifier("C" + generateCategoryId());
         return categoryRepository.save(category);
     }
 
     // update category
     @Override
-    public Category updateCategory(Category category) throws CategoryNotFoundException {
+    public Category updateCategory(Category category) throws NotFoundException {
         Category updateCategory = checkCategoryExist(category.getCategoryIdentifier());
         updateCategory.setTitle(category.getTitle());
         updateCategory.setDescription(category.getDescription());
@@ -50,14 +50,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     // get single category
     @Override
-    public Category getCategory(String categoryIdentifier) throws CategoryNotFoundException {
+    public Category getCategory(String categoryIdentifier) throws NotFoundException {
         Category category = checkCategoryExist(categoryIdentifier);
         return category;
     }
 
     // delete category
     @Override
-    public void deleteCategory(String categoryIdentifier) throws CategoryNotFoundException {
+    public void deleteCategory(String categoryIdentifier) throws NotFoundException {
         Category category = checkCategoryExist(categoryIdentifier);
         categoryRepository.deleteById(category.getId());
     }
@@ -68,11 +68,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     // check category exist or not
-    private Category checkCategoryExist(String categoryIdentifier) throws CategoryNotFoundException {
+    private Category checkCategoryExist(String categoryIdentifier) throws NotFoundException {
         Category category = categoryRepository.findCategoryByCategoryIdentifier(categoryIdentifier);
         // check & throw exception category not found
         if (category == null) {
-            throw new CategoryNotFoundException("Category not found with this identifier " + categoryIdentifier);
+            throw new NotFoundException("Category not found with this identifier " + categoryIdentifier);
         }
         return category;
     }

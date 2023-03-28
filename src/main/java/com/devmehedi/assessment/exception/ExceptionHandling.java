@@ -1,6 +1,6 @@
 package com.devmehedi.assessment.exception;
 
-import com.devmehedi.assessment.exception.model.CategoryNotFoundException;
+import com.devmehedi.assessment.exception.model.NotFoundException;
 import com.devmehedi.assessment.model.HttpResponse;
 import jakarta.persistence.NoResultException;
 import org.slf4j.Logger;
@@ -33,8 +33,8 @@ public class ExceptionHandling implements ErrorController {
     private static final String NOT_ENOUGH_PERMISSION = "You do not have enough permission";
     public static final String ERROR_PATH = "/error";
 
-    @ExceptionHandler(CategoryNotFoundException.class)
-    public ResponseEntity<HttpResponse> categoryNotFoundException(CategoryNotFoundException exception) {
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<HttpResponse> notFoundException(NotFoundException exception) {
         return createHttpResponse(BAD_REQUEST, exception.getMessage());
     }
 
