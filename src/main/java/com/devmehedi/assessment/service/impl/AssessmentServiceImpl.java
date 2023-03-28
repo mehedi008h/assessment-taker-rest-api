@@ -1,6 +1,8 @@
 package com.devmehedi.assessment.service.impl;
 
+import com.devmehedi.assessment.dto.AssessmentDTO;
 import com.devmehedi.assessment.exception.model.NotFoundException;
+import com.devmehedi.assessment.mapper.AssessmentMapper;
 import com.devmehedi.assessment.model.Assessment;
 import com.devmehedi.assessment.model.Category;
 import com.devmehedi.assessment.repository.AssessmentRepository;
@@ -9,50 +11,62 @@ import com.devmehedi.assessment.service.AssessmentService;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class AssessmentServiceImpl implements AssessmentService {
     private AssessmentRepository assessmentRepository;
     private CategoryRepository categoryRepository;
+    private AssessmentMapper assessmentMapper;
 
     @Autowired
-    public AssessmentServiceImpl(AssessmentRepository assessmentRepository, CategoryRepository categoryRepository) {
+    public AssessmentServiceImpl(AssessmentRepository assessmentRepository, CategoryRepository categoryRepository, AssessmentMapper assessmentMapper) {
         this.assessmentRepository = assessmentRepository;
         this.categoryRepository = categoryRepository;
+        this.assessmentMapper = assessmentMapper;
     }
 
     // create assessment
     @Override
-    public Assessment addAssessment(Assessment assessment) throws NotFoundException {
+    public AssessmentDTO addAssessment(AssessmentDTO assessmentDTO) throws NotFoundException {
+        // copy assessmentDTO
+        Assessment assessment = assessmentMapper.fromAssessmentDTO(assessmentDTO);
+        Category category = checkCategoryExist(assessmentDTO.getCategory().getCategoryIdentifier());
         // set assessment identifier
         assessment.setAssessmentIdentifier("A" + generateAssessmentId());
-        Category category = checkCategoryExist(assessment.getCategory().getCategoryIdentifier());
         assessment.setCategory(category);
-        return assessmentRepository.save(assessment);
+        Assessment newAssessment = assessmentRepository.save(assessment);
+        return assessmentMapper.fromAssessment(newAssessment);
     }
 
     // update assessment
     @Override
-    public Assessment updateAssessment(Assessment assessment) throws NotFoundException {
-        Assessment updateAssessment = checkAssessmentExist(assessment.getAssessmentIdentifier());
-        updateAssessment.setTitle(assessment.getTitle());
-        updateAssessment.setDescription(assessment.getDescription());
-        updateAssessment.setAttempt(assessment.getAttempt());
-        updateAssessment.setActive(assessment.isActive());
-        Category category = checkCategoryExist(assessment.getCategory().getCategoryIdentifier());
+    public AssessmentDTO updateAssessment(AssessmentDTO assessmentDTO) throws NotFoundException {
+        Assessment loadAssessment = checkAssessmentExist(assessmentDTO.getAssessmentIdentifier());
+        Category category = checkCategoryExist(assessmentDTO.getCategory().getCategoryIdentifier());
+        // copy assessmentDTO
+        Assessment assessment = assessmentMapper.fromAssessmentDTO(assessmentDTO);
         assessment.setCategory(category);
-        return assessmentRepository.save(updateAssessment);
+        assessment.setQuestions(loadAssessment.getQuestions());
+        Assessment updateAssessment = assessmentRepository.save(assessment);
+        return assessmentMapper.fromAssessment(updateAssessment);
     }
 
     // get assessments
     @Override
-    public Set<Assessment> getAssessments() {
-        return new LinkedHashSet<>(assessmentRepository.findAll());
+    public Page<AssessmentDTO> getAssessments(String keyword, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Assessment> assessmentPage = assessmentRepository.findAssessmentByTitleContains(keyword, pageRequest);
+        return new PageImpl<>(assessmentPage.getContent()
+                .stream()
+                .map(assessment -> assessmentMapper.fromAssessment(assessment))
+                .collect(Collectors.toList()), pageRequest, assessmentPage.getTotalElements());
     }
 
     // get single assessment

@@ -1,5 +1,6 @@
 package com.devmehedi.assessment.controller;
 
+import com.devmehedi.assessment.dto.AssessmentDTO;
 import com.devmehedi.assessment.exception.ExceptionHandling;
 import com.devmehedi.assessment.exception.model.NotFoundException;
 import com.devmehedi.assessment.model.Assessment;
@@ -9,12 +10,11 @@ import com.devmehedi.assessment.service.ValidationErrorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Set;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
@@ -35,19 +35,23 @@ public class AssessmentController extends ExceptionHandling {
 
     // create assessment
     @PostMapping
-    public ResponseEntity<?> createAssessment(@Valid @RequestBody Assessment assessment, BindingResult result) throws NotFoundException {
+    public ResponseEntity<?> createAssessment(@Valid @RequestBody AssessmentDTO assessmentDTO, BindingResult result) throws NotFoundException {
         // validate field error
         ResponseEntity<?> errorMap = validationErrorService.ValidationService(result);
         if (errorMap != null) return response(BAD_REQUEST, errorMap.getBody().toString());
 
-        Assessment newAssessment = assessmentService.addAssessment(assessment);
+        AssessmentDTO newAssessment = assessmentService.addAssessment(assessmentDTO);
         return new ResponseEntity<>(newAssessment, OK);
     }
 
     // get all assessment
     @GetMapping
-    public ResponseEntity<Set<Assessment>> getAllCategory() {
-        Set<Assessment> assessments = assessmentService.getAssessments();
+    public ResponseEntity<Page<AssessmentDTO>> getAllAssessment(
+            @RequestParam(name = "keyword", defaultValue = "") String keyword,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size
+    ) {
+        Page<AssessmentDTO> assessments = assessmentService.getAssessments(keyword, page, size);
         return new ResponseEntity<>(assessments, OK);
     }
 
@@ -60,8 +64,8 @@ public class AssessmentController extends ExceptionHandling {
 
     // update assessment by assessment identifier
     @PutMapping
-    public ResponseEntity<Assessment> updateAssessment(@RequestBody Assessment assessment) throws NotFoundException {
-        Assessment updateAssessment = assessmentService.updateAssessment(assessment);
+    public ResponseEntity<AssessmentDTO> updateAssessment(@RequestBody AssessmentDTO assessmentDTO) throws NotFoundException {
+        AssessmentDTO updateAssessment = assessmentService.updateAssessment(assessmentDTO);
         return new ResponseEntity<>(updateAssessment, OK);
     }
 
