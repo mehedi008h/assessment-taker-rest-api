@@ -40,6 +40,7 @@ public class Assessment {
     // relation mapping
     // many-to-one relation between category
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private Category category;
 
     // one-to-many relation between question
