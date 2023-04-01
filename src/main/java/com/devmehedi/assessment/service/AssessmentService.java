@@ -5,8 +5,6 @@ import com.devmehedi.assessment.exception.model.NotFoundException;
 import com.devmehedi.assessment.model.Assessment;
 import org.springframework.data.domain.Page;
 
-import java.util.Set;
-
 public interface AssessmentService {
     public AssessmentDTO addAssessment(AssessmentDTO assessmentDTO) throws NotFoundException;
     public AssessmentDTO updateAssessment(AssessmentDTO assessmentDTO) throws NotFoundException;
