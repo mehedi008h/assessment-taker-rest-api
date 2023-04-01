@@ -52,13 +52,6 @@ public class QuestionServiceImpl implements QuestionService {
         Assessment assessment = checkAssessmentExist(questionDTO.getAssessment().getAssessmentIdentifier());
         // copy from questionDTO
         Question question = questionMapper.fromQuestionDTO(questionDTO);
-        question.setContent(loadQuestion.getContent());
-        question.setOption1(loadQuestion.getOption1());
-        question.setOption2(loadQuestion.getOption2());
-        question.setOption3(loadQuestion.getOption3());
-        question.setOption4(loadQuestion.getOption4());
-        question.setOption5(loadQuestion.getOption5());
-        question.setAnswer(loadQuestion.getAnswer());
         question.setAssessment(assessment);
         Question updateQuestion = questionRepository.save(question);
         return questionMapper.fromQuestion(updateQuestion);
