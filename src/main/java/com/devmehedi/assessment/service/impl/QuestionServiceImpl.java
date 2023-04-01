@@ -1,50 +1,78 @@
 package com.devmehedi.assessment.service.impl;
 
+import com.devmehedi.assessment.dto.QuestionDTO;
 import com.devmehedi.assessment.exception.model.NotFoundException;
+import com.devmehedi.assessment.mapper.QuestionMapper;
+import com.devmehedi.assessment.model.Assessment;
 import com.devmehedi.assessment.model.Question;
+import com.devmehedi.assessment.repository.AssessmentRepository;
 import com.devmehedi.assessment.repository.QuestionRepository;
 import com.devmehedi.assessment.service.QuestionService;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class QuestionServiceImpl implements QuestionService {
     private QuestionRepository questionRepository;
+    private AssessmentRepository assessmentRepository;
+    private QuestionMapper questionMapper;
 
     @Autowired
-    public QuestionServiceImpl(QuestionRepository questionRepository) {
+    public QuestionServiceImpl(QuestionRepository questionRepository, QuestionMapper questionMapper, AssessmentRepository assessmentRepository) {
         this.questionRepository = questionRepository;
+        this.questionMapper = questionMapper;
+        this.assessmentRepository = assessmentRepository;
     }
 
     @Override
-    public Question addQuestion(Question question) {
+    public QuestionDTO addQuestion(QuestionDTO questionDTO) throws NotFoundException {
+        // copy from questionDTO
+        Question question = questionMapper.fromQuestionDTO(questionDTO);
+        // check assessment exist
+        Assessment assessment = checkAssessmentExist(questionDTO.getAssessment().getAssessmentIdentifier());
         // set question identifier
-        question.setQuestionIdentifier(generateQuestionId());
-        return questionRepository.save(question);
+        question.setQuestionIdentifier("Q" + generateQuestionId());
+        question.setAssessment(assessment);
+        Question newQuestion = questionRepository.save(question);
+        return questionMapper.fromQuestion(newQuestion);
     }
 
     @Override
-    public Question updateQuestion(Question question) throws NotFoundException {
-        Question updateQuestion = checkQuestionExist(question.getQuestionIdentifier());
-        updateQuestion.setContent(question.getContent());
-        updateQuestion.setOption1(question.getOption1());
-        updateQuestion.setOption2(question.getOption2());
-        updateQuestion.setOption3(question.getOption3());
-        updateQuestion.setOption4(question.getOption4());
-        updateQuestion.setOption5(question.getOption5());
-        updateQuestion.setAnswer(question.getAnswer());
-        return questionRepository.save(updateQuestion);
+    public QuestionDTO updateQuestion(QuestionDTO questionDTO) throws NotFoundException {
+        Question loadQuestion = checkQuestionExist(questionDTO.getQuestionIdentifier());
+        // check assessment exist
+        Assessment assessment = checkAssessmentExist(questionDTO.getAssessment().getAssessmentIdentifier());
+        // copy from questionDTO
+        Question question = questionMapper.fromQuestionDTO(questionDTO);
+        question.setContent(loadQuestion.getContent());
+        question.setOption1(loadQuestion.getOption1());
+        question.setOption2(loadQuestion.getOption2());
+        question.setOption3(loadQuestion.getOption3());
+        question.setOption4(loadQuestion.getOption4());
+        question.setOption5(loadQuestion.getOption5());
+        question.setAnswer(loadQuestion.getAnswer());
+        question.setAssessment(assessment);
+        Question updateQuestion = questionRepository.save(question);
+        return questionMapper.fromQuestion(updateQuestion);
     }
 
     @Override
-    public Set<Question> getQuestions() {
-        return new LinkedHashSet<>(questionRepository.findAll());
+    public Page<QuestionDTO> getQuestions(String keyword, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Question> questionPage = questionRepository.findQuestionByContentContains(keyword, pageRequest);
+
+        return new PageImpl<>(questionPage.getContent()
+                .stream()
+                .map(question -> questionMapper.fromQuestion(question))
+                .collect(Collectors.toList()), pageRequest, questionPage.getTotalElements());
     }
 
     @Override
@@ -72,5 +100,15 @@ public class QuestionServiceImpl implements QuestionService {
             throw new NotFoundException("Question not found with this identifier " + questionIdentifier);
         }
         return question;
+    }
+
+    // check assessment exist or not
+    private Assessment checkAssessmentExist(String assessmentIdentifier) throws NotFoundException {
+        Assessment assessment = assessmentRepository.findAssessmentByAssessmentIdentifier(assessmentIdentifier);
+        // check & throw exception category not found
+        if (assessment == null) {
+            throw new NotFoundException("Assessment not found with this identifier " + assessmentIdentifier);
+        }
+        return assessment;
     }
 }
