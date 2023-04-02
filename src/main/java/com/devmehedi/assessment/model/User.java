@@ -40,7 +40,7 @@ public class User {
     @Column(length = 5000)
     private String description;
     private String work;
-    private int dimond;
+    private int diamond;
     @Column(name = "profile_image_url")
     private String profileImageUrl;
     @Column(name = "last_login_date")
