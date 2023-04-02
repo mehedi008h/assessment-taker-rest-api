@@ -1,5 +1,6 @@
 package com.devmehedi.assessment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -46,6 +47,7 @@ public class Question {
 
     // relation mapping
     // many-to-one relation between quiz
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private Assessment assessment;
 }

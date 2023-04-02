@@ -16,6 +16,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +36,7 @@ public class QuestionServiceImpl implements QuestionService {
         this.assessmentRepository = assessmentRepository;
     }
 
+    // add question to assessment
     @Override
     public QuestionDTO addQuestion(QuestionDTO questionDTO) throws NotFoundException {
         // copy from questionDTO
@@ -45,6 +50,7 @@ public class QuestionServiceImpl implements QuestionService {
         return questionMapper.fromQuestion(newQuestion);
     }
 
+    // update question
     @Override
     public QuestionDTO updateQuestion(QuestionDTO questionDTO) throws NotFoundException {
         Question loadQuestion = checkQuestionExist(questionDTO.getQuestionIdentifier());
@@ -57,10 +63,12 @@ public class QuestionServiceImpl implements QuestionService {
         return questionMapper.fromQuestion(updateQuestion);
     }
 
+    // get all question -> (Admin)
     @Override
-    public Page<QuestionDTO> getQuestions(String keyword, int page, int size) {
+    public Page<QuestionDTO> getAssessmentQuestions(String assessmentIdentifier, String keyword, int page, int size) throws NotFoundException {
+        Assessment assessment = checkAssessmentExist(assessmentIdentifier);
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Question> questionPage = questionRepository.findQuestionByContentContains(keyword, pageRequest);
+        Page<Question> questionPage = questionRepository.findQuestionByAssessmentAndContentContains(assessment, keyword, pageRequest);
 
         return new PageImpl<>(questionPage.getContent()
                 .stream()
@@ -68,16 +76,29 @@ public class QuestionServiceImpl implements QuestionService {
                 .collect(Collectors.toList()), pageRequest, questionPage.getTotalElements());
     }
 
+    // get single question
     @Override
     public Question getQuestion(String questionIdentifier) throws NotFoundException {
         Question question = checkQuestionExist(questionIdentifier);
         return question;
     }
 
+    // delete question
     @Override
     public void deleteQuestion(String questionIdentifier) throws NotFoundException {
         Question question = checkQuestionExist(questionIdentifier);
         questionRepository.deleteById(question.getId());
+    }
+
+    // get all question of an assessment -> user
+    @Override
+    public List listOfAssessmentQuestion(String assessmentIdentifier) throws NotFoundException {
+        Assessment assessment = checkAssessmentExist(assessmentIdentifier);
+        Set<Question> questions = assessment.getQuestions();
+        List list = new ArrayList<>(questions);
+        // different serial for different user (shake the list)
+        Collections.shuffle(list);
+        return list;
     }
 
     // generate random string
