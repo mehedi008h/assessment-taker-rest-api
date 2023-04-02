@@ -26,13 +26,13 @@ public class Question {
     private String content;
     private String image;
     @Column(name = "option_1")
-    @NotBlank(message = "Question option4 is required!")
+    @NotBlank(message = "Question option1 is required!")
     private String option1;
     @Column(name = "option_2")
-    @NotBlank(message = "Question option4 is required!")
+    @NotBlank(message = "Question option2 is required!")
     private String option2;
     @Column(name = "option_3")
-    @NotBlank(message = "Question option4 is required!")
+    @NotBlank(message = "Question option3 is required!")
     private String option3;
     @Column(name = "option_4")
     @NotBlank(message = "Question option4 is required!")
