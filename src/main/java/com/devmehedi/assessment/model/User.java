@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -49,8 +51,23 @@ public class User {
     private Date lastLoginDateDisplay;
     @Column(name = "join_date")
     private Date joinDate;
-    private String role;
-    private String[] authorities;
     private boolean isActive;
     private boolean isNotLocked;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_role",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "role_id")})
+    private Set<Role> roles = new HashSet<>();
+
+    // assign user role
+    public void assignRoleToUser(Role role) {
+        this.roles.add(role);
+        role.getUsers().add(this);
+    }
+
+    // remove user role
+    public void removeRoleFromUser(Role role) {
+        this.roles.remove(role);
+        role.getUsers().remove(this);
+    }
 }
