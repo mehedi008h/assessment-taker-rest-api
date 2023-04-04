@@ -7,9 +7,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 @Setter
 @Getter
@@ -17,7 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity(name = "User")
 @Table(name = "users")
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, updatable = false)
@@ -32,7 +31,7 @@ public class User {
     private String username;
     @NotBlank(message = "Password is required!")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Size(min = 8, max = 20, message = "Please use 8 to 20 characters")
+    @Size(min = 8, message = "Please use minimum 8 characters")
     private String password;
     @Email
     @NotBlank(message = "Email is required!")
@@ -51,23 +50,8 @@ public class User {
     private Date lastLoginDateDisplay;
     @Column(name = "join_date")
     private Date joinDate;
+    private String role; //ROLE_USER{ read, edit }, ROLE_ADMIN {delete}
+    private String[] authorities;
     private boolean isActive;
     private boolean isNotLocked;
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_role",
-            joinColumns = {@JoinColumn(name = "user_id")},
-            inverseJoinColumns = {@JoinColumn(name = "role_id")})
-    private Set<Role> roles = new HashSet<>();
-
-    // assign user role
-    public void assignRoleToUser(Role role) {
-        this.roles.add(role);
-        role.getUsers().add(this);
-    }
-
-    // remove user role
-    public void removeRoleFromUser(Role role) {
-        this.roles.remove(role);
-        role.getUsers().remove(this);
-    }
 }
