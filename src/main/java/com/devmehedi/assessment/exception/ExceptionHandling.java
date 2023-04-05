@@ -38,11 +38,6 @@ public class ExceptionHandling implements ErrorController {
     private static final String NOT_ENOUGH_PERMISSION = "You do not have enough permission";
     public static final String ERROR_PATH = "/error";
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<HttpResponse> notFoundExceptions(NotFoundException exception) {
-        return createHttpResponse(BAD_REQUEST, exception.getMessage());
-    }
-
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<HttpResponse> accountDisabledException() {
         return createHttpResponse(BAD_REQUEST, ACCOUNT_DISABLED);
@@ -121,6 +116,10 @@ public class ExceptionHandling implements ErrorController {
     public ResponseEntity<HttpResponse> iOException(IOException exception) {
         LOGGER.error(exception.getMessage());
         return createHttpResponse(INTERNAL_SERVER_ERROR, ERROR_PROCESSING_FILE);
+    }
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<HttpResponse> notFoundExceptions(NotFoundException exception) {
+        return createHttpResponse(BAD_REQUEST, exception.getMessage());
     }
 
     private ResponseEntity<HttpResponse> createHttpResponse(HttpStatus httpStatus, String message) {

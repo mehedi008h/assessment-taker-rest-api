@@ -8,6 +8,7 @@ import com.devmehedi.assessment.exception.model.UsernameExistException;
 import com.devmehedi.assessment.model.User;
 import com.devmehedi.assessment.model.UserPrincipal;
 import com.devmehedi.assessment.repository.UserRepository;
+import com.devmehedi.assessment.service.LoginAttemptService;
 import com.devmehedi.assessment.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -48,12 +49,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
     private UserRepository userRepository;
+    private LoginAttemptService loginAttemptService;
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder,LoginAttemptService loginAttemptService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.loginAttemptService = loginAttemptService;
     }
 
     // load user by username
@@ -64,6 +67,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             LOGGER.error("No user found by username" + username);
             throw new UsernameNotFoundException("No user found by username" + username);
         } else {
+            validateLoginAttempt(user);
             user.setLastLoginDateDisplay(user.getLastLoginDate());
             user.setLastLoginDate(new Date());
             userRepository.save(user);
@@ -173,6 +177,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return RandomStringUtils.randomNumeric(10);
     }
 
+    // validation login attempt service
+    private void validateLoginAttempt(User user) {
+        if (user.isNotLocked()) {
+            if (loginAttemptService.hasExceededMaxAttempts(user.getUsername())) {
+                user.setNotLocked(false);
+            } else {
+                user.setNotLocked(true);
+            }
+        } else {
+            loginAttemptService.evictUserFromLoginAttemptCache(user.getUsername());
+        }
+    }
+
     // check email or username is valid or not
     private User validateNewUsernameAndEmail(String currentUsername, String newUsername, String newEmail) throws UserNotFoundException, UsernameExistException, EmailExistException {
         User userByNewUsername = findUserByUsername(newUsername);
@@ -199,5 +216,4 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return null;
         }
     }
-
 }

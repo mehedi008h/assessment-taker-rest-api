@@ -1,5 +1,6 @@
 package com.devmehedi.assessment.controller;
 
+import com.devmehedi.assessment.exception.ExceptionHandling;
 import com.devmehedi.assessment.exception.model.EmailExistException;
 import com.devmehedi.assessment.exception.model.NotAnImageFileException;
 import com.devmehedi.assessment.exception.model.UserNotFoundException;
@@ -35,7 +36,7 @@ import static org.springframework.http.MediaType.*;
 @RequiredArgsConstructor
 @RequestMapping(value = "/api/v1/user")
 @RestController
-public class UserController {
+public class UserController extends ExceptionHandling {
     private UserService userService;
     private AuthenticationManager authenticationManager;
     private JWTTokenProvider jwtTokenProvider;
