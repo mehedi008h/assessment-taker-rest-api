@@ -41,7 +41,7 @@ public class User implements Serializable {
     @Column(length = 5000)
     private String description;
     private String work;
-    private int diamond;
+    private int reward;
     @Column(name = "profile_image_url")
     private String profileImageUrl;
     @Column(name = "last_login_date")

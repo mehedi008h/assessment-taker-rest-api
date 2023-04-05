@@ -1,6 +1,8 @@
 package com.devmehedi.assessment.service.impl;
 
+import com.devmehedi.assessment.enumration.Role;
 import com.devmehedi.assessment.exception.model.EmailExistException;
+import com.devmehedi.assessment.exception.model.NotAnImageFileException;
 import com.devmehedi.assessment.exception.model.UserNotFoundException;
 import com.devmehedi.assessment.exception.model.UsernameExistException;
 import com.devmehedi.assessment.model.User;
@@ -20,13 +22,21 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import static com.devmehedi.assessment.constant.FileConstant.DEFAULT_USER_IMAGE_PATH;
+import static com.devmehedi.assessment.constant.FileConstant.*;
 import static com.devmehedi.assessment.constant.UserImplConstant.*;
 import static com.devmehedi.assessment.enumration.Role.*;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.springframework.http.MediaType.*;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Date;
 
 @RequiredArgsConstructor
@@ -45,6 +55,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // load user by username
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findUserByUsername(username);
@@ -61,6 +72,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
     }
 
+    // register new user
     @Override
     public User register(String firstName, String lastName, String username, String email, String password) throws UserNotFoundException, EmailExistException, UsernameExistException {
         validateNewUsernameAndEmail(EMPTY, username, email);
@@ -81,28 +93,80 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return user;
     }
 
+    // find user by username
     @Override
     public User findUserByUsername(String username) {
         return userRepository.findUserByUsername(username);
     }
 
+    // find user by email
     @Override
     public User findUserByEmail(String email) {
         return userRepository.findUserByEmail(email);
     }
 
+    // update user
+    @Override
+    public User updateUser(String currentUsername, String newFirstName, String newLastName, String newUsername, String newEmail, String newPhone, String newDescription, String newWork, MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException {
+        User currentUser = validateNewUsernameAndEmail(currentUsername, newUsername, newEmail);
+        currentUser.setFirstName(newFirstName);
+        currentUser.setLastName(newLastName);
+        currentUser.setUsername(newUsername);
+        currentUser.setEmail(newEmail);
+        currentUser.setPhone(newPhone);
+        currentUser.setDescription(newDescription);
+        currentUser.setWork(newWork);
+        userRepository.save(currentUser);
+        saveProfileImage(currentUser, profileImage);
+        return currentUser;
+    }
+
+    // save image
+    private void saveProfileImage(User user, MultipartFile profileImage) throws IOException, NotAnImageFileException {
+        if (profileImage != null) {
+            if (!Arrays.asList(IMAGE_JPEG_VALUE, IMAGE_PNG_VALUE, IMAGE_GIF_VALUE).contains(profileImage.getContentType())) {
+                throw new NotAnImageFileException(profileImage.getOriginalFilename() + NOT_AN_IMAGE_FILE);
+            }
+            Path userFolder = Paths.get(USER_FOLDER + user.getUsername()).toAbsolutePath().normalize();
+            if (!Files.exists(userFolder)) {
+                Files.createDirectories(userFolder);
+                LOGGER.info(DIRECTORY_CREATED + userFolder);
+            }
+            Files.deleteIfExists(Paths.get(userFolder + user.getUsername() + DOT + JPG_EXTENSION));
+            Files.copy(profileImage.getInputStream(), userFolder.resolve(user.getUsername() + DOT + JPG_EXTENSION), REPLACE_EXISTING);
+            user.setProfileImageUrl(setProfileImageUrl(user.getUsername()));
+            userRepository.save(user);
+            LOGGER.info(FILE_SAVED_IN_FILE_SYSTEM + profileImage.getOriginalFilename());
+        }
+    }
+
+    // generate image url
+    private String setProfileImageUrl(String username) {
+        return ServletUriComponentsBuilder.fromCurrentContextPath().path(USER_IMAGE_PATH + username + FORWARD_SLASH
+                + username + DOT + JPG_EXTENSION).toUriString();
+    }
+
+    // get role
+    private Role getRoleEnumName(String role) {
+        return Role.valueOf(role.toUpperCase());
+    }
+
+    // temporary image for user
     private String getTemporaryProfileImageUrl(String username) {
         return ServletUriComponentsBuilder.fromCurrentContextPath().path(DEFAULT_USER_IMAGE_PATH + username).toUriString();
     }
 
+    // encoded password
     private String encodePassword(String password) {
         return passwordEncoder.encode(password);
     }
 
+    // generate random user identifier
     private String generateUserId() {
         return RandomStringUtils.randomNumeric(10);
     }
 
+    // check email or username is valid or not
     private User validateNewUsernameAndEmail(String currentUsername, String newUsername, String newEmail) throws UserNotFoundException, UsernameExistException, EmailExistException {
         User userByNewUsername = findUserByUsername(newUsername);
         User userByNewEmail = findUserByEmail(newEmail);
