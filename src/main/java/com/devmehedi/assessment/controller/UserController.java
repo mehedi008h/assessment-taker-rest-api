@@ -1,5 +1,9 @@
 package com.devmehedi.assessment.controller;
 
+import com.devmehedi.assessment.exception.model.EmailExistException;
+import com.devmehedi.assessment.exception.model.NotAnImageFileException;
+import com.devmehedi.assessment.exception.model.UserNotFoundException;
+import com.devmehedi.assessment.exception.model.UsernameExistException;
 import com.devmehedi.assessment.model.HttpResponse;
 import com.devmehedi.assessment.model.User;
 import com.devmehedi.assessment.model.UserPrincipal;
@@ -12,10 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 import static com.devmehedi.assessment.constant.SecurityConstant.JWT_TOKEN_HEADER;
 import static org.springframework.http.HttpStatus.*;
@@ -45,9 +49,23 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user)  {
-        User newUser = userService.register(user.getFirstName(), user.getLastName(), user.getUsername(), user.getEmail(),user.getPassword());
+    public ResponseEntity<User> registerUser(@RequestBody User user) throws UserNotFoundException, EmailExistException, UsernameExistException {
+        User newUser = userService.register(user.getFirstName(), user.getLastName(), user.getUsername(), user.getEmail(), user.getPassword());
         return new ResponseEntity<>(newUser, OK);
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<User> update(@RequestParam("currentUsername") String currentUsername,
+                                       @RequestParam("firstName") String firstName,
+                                       @RequestParam("lastName") String lastName,
+                                       @RequestParam("username") String username,
+                                       @RequestParam("email") String email,
+                                       @RequestParam("phone") String phone,
+                                       @RequestParam("description") String description,
+                                       @RequestParam("work") String work,
+                                       @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException {
+        User updatedUser = userService.updateUser(currentUsername, firstName, lastName, username, email, phone, description, work, profileImage);
+        return new ResponseEntity<>(updatedUser, OK);
     }
 
     private ResponseEntity<HttpResponse> response(HttpStatus httpStatus, String message) {
