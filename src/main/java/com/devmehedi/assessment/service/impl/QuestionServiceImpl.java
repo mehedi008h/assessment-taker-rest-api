@@ -78,9 +78,9 @@ public class QuestionServiceImpl implements QuestionService {
 
     // get single question
     @Override
-    public Question getQuestion(String questionIdentifier) throws NotFoundException {
+    public QuestionDTO getQuestion(String questionIdentifier) throws NotFoundException {
         Question question = checkQuestionExist(questionIdentifier);
-        return question;
+        return questionMapper.fromQuestion(question);
     }
 
     // delete question

@@ -8,7 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -40,6 +42,7 @@ public class Assessment {
     // relation mapping
     // many-to-one relation between category
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private Category category;
 
     // one-to-many relation between question
@@ -51,4 +54,13 @@ public class Assessment {
     )
     @JsonIgnore
     private Set<Question> questions = new HashSet<>();
+    // one-to-many relation between result
+    @OneToMany(
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            fetch = FetchType.LAZY,
+            mappedBy = "assessment",
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private List<Result> results = new ArrayList<>();
 }

@@ -3,11 +3,10 @@ package com.devmehedi.assessment.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -16,7 +15,7 @@ import lombok.Setter;
 @Entity(name = "Question")
 public class Question {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false, updatable = false)
     private Long id;
     @Column(updatable = false, nullable = false, name = "question_identifier")
@@ -40,9 +39,10 @@ public class Question {
     @Column(name = "option_5")
     private String option5;
     @NotBlank(message = "Question answer is required!")
-    private String answer;
+    private String questionAnswer;
+    @NotNull(message = "Question mark is required!")
+    private int mark;
     @Transient
-    @Column(name = "given_answer")
     private String givenAnswer;
 
     // relation mapping
@@ -50,4 +50,11 @@ public class Question {
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     private Assessment assessment;
+    // one-to-one relation between
+    @OneToOne(
+            mappedBy = "question",
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private Answer answer;
 }

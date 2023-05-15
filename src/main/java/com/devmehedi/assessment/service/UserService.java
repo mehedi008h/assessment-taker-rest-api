@@ -5,6 +5,7 @@ import com.devmehedi.assessment.exception.model.NotAnImageFileException;
 import com.devmehedi.assessment.exception.model.UserNotFoundException;
 import com.devmehedi.assessment.exception.model.UsernameExistException;
 import com.devmehedi.assessment.model.User;
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public interface UserService {
     User register(String firstName, String lastName, String username, String email, String password) throws UserNotFoundException, EmailExistException, UsernameExistException;
-    List<User> getUsers();
+    Page<User> getUsers(String keyword, int page, int size);
     User findUserByUsername(String username);
 
     User findUserByEmail(String email);

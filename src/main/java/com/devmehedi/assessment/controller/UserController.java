@@ -12,6 +12,7 @@ import com.devmehedi.assessment.service.UserService;
 import com.devmehedi.assessment.util.JWTTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -83,9 +84,14 @@ public class UserController extends ExceptionHandling {
         return new ResponseEntity<>(user, OK);
     }
 
-    @GetMapping("/list")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getUsers();
+    // get all user
+    @GetMapping
+    public ResponseEntity<Page<User>> getAllUsers(
+            @RequestParam(name = "keyword", defaultValue = "") String keyword,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size
+    ) {
+        Page<User> users = userService.getUsers(keyword, page, size);
         return new ResponseEntity<>(users, OK);
     }
 

@@ -62,8 +62,8 @@ public class QuestionController {
 
     // get single question by question identifier
     @GetMapping("/details/{questionIdentifier}")
-    public ResponseEntity<Question> getQuestion(@PathVariable("questionIdentifier") String questionIdentifier) throws NotFoundException {
-        Question question = questionService.getQuestion(questionIdentifier);
+    public ResponseEntity<QuestionDTO> getQuestion(@PathVariable("questionIdentifier") String questionIdentifier) throws NotFoundException {
+        QuestionDTO question = questionService.getQuestion(questionIdentifier);
         return new ResponseEntity<>(question, OK);
     }
 
