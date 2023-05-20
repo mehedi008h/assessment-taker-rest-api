@@ -22,8 +22,7 @@ public class Answer {
     private String answerIdentifier;
     private String givenAnswer;
     // one-to-one relation between question
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "question_id", referencedColumnName = "id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     private Question question ;
     // many-to-one relation between result

@@ -16,5 +16,4 @@ public interface AssessmentService {
     public Page<AssessmentDTO> getAssessments(String keyword, int page, int size);
     public AssessmentDTO getAssessment(String assessmentIdentifier) throws NotFoundException;
     public void deleteAssessment(String assessmentIdentifier) throws NotFoundException;
-    public Result evalAssessment(List<QuestionDTO> questionDTOS,String assessmentIdentifier, String username) throws NotFoundException;
 }

@@ -98,47 +98,6 @@ public class AssessmentServiceImpl implements AssessmentService {
         assessmentRepository.deleteById(assessment.getId());
     }
 
-    // eval assessment
-    @Override
-    public Result evalAssessment(List<QuestionDTO> questionDTOS,String assessmentIdentifier, String username) throws NotFoundException {
-        List<Question> questions = questionDTOS.stream().map(questionDTO -> questionMapper.fromQuestionDTO(questionDTO)).collect(Collectors.toList());
-        LOGGER.info("username : " + username);
-        LOGGER.info("questions : " + questions);
-        int marksGot = 0;
-        int correctAnswer = 0;
-        int totalMark = 0;
-        User user = findUserByUsername(username);
-        Assessment assessment = checkAssessmentExist(assessmentIdentifier);
-        Result result = new Result();
-
-        for (Question q : questions) {
-            totalMark = totalMark + q.getMark();
-            // answer
-            Answer answer = new Answer();
-            answer.setAnswerIdentifier("A" + generateRandomId());
-            answer.setGivenAnswer(q.getGivenAnswer());
-            answer.setQuestion(q);
-            answer.setResult(result);
-            answerRepository.save(answer);
-            if (q.getQuestionAnswer().equals(q.getGivenAnswer())) {
-                marksGot = marksGot + q.getMark();
-                correctAnswer++;
-            }
-        }
-        if(((marksGot * 100) / totalMark) > 90) {
-            user.setReward(user.getReward() + 1);
-        }
-        userRepository.save(user);
-        // result
-        result.setResultIdentifier("R" + generateRandomId());
-        result.setMarkGot(marksGot);
-        result.setCorrectAnswer(correctAnswer);
-        result.setAttempted(1);
-        result.setUser(user);
-        result.setAssessment(assessment);
-        return resultRepository.save(result);
-    }
-
     // generate random string
     private String generateRandomId() {
         return RandomStringUtils.randomNumeric(10);
@@ -164,8 +123,5 @@ public class AssessmentServiceImpl implements AssessmentService {
         return category;
     }
 
-    // find user by username
-    public User findUserByUsername(String username) {
-        return userRepository.findUserByUsername(username);
-    }
+
 }

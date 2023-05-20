@@ -1,12 +1,9 @@
 package com.devmehedi.assessment.controller;
 
 import com.devmehedi.assessment.dto.AssessmentDTO;
-import com.devmehedi.assessment.dto.QuestionDTO;
 import com.devmehedi.assessment.exception.ExceptionHandling;
 import com.devmehedi.assessment.exception.model.NotFoundException;
 import com.devmehedi.assessment.model.HttpResponse;
-import com.devmehedi.assessment.model.Question;
-import com.devmehedi.assessment.model.Result;
 import com.devmehedi.assessment.service.AssessmentService;
 import com.devmehedi.assessment.service.ValidationErrorService;
 import jakarta.validation.Valid;
@@ -18,9 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-import java.util.List;
-
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -30,7 +24,6 @@ import static org.springframework.http.HttpStatus.OK;
 public class AssessmentController extends ExceptionHandling {
     private AssessmentService assessmentService;
     private static final String ASSESSMENT_DELETED_SUCCESSFULLY = "Assessment Deleted Successfully";
-    private static final String ASSESSMENT_SAVED_SUCCESSFULLY = "Assessment Saved Successfully";
     private ValidationErrorService validationErrorService;
 
     @Autowired
@@ -82,12 +75,6 @@ public class AssessmentController extends ExceptionHandling {
         return response(OK, ASSESSMENT_DELETED_SUCCESSFULLY);
     }
 
-    @PostMapping("/eval-assessment/{assessmentIdentifier}")
-    public ResponseEntity<Result> evalAssessment(@RequestBody List<QuestionDTO> questionsDTOS,@PathVariable String assessmentIdentifier, Principal principal) throws NotFoundException {
-        Result result = assessmentService.evalAssessment(questionsDTOS,assessmentIdentifier, principal.getName());
-        return new ResponseEntity<>(result, OK);
-
-    }
 
     private ResponseEntity<HttpResponse> response(HttpStatus httpStatus, String message) {
         return new ResponseEntity<>(new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase().toUpperCase(),

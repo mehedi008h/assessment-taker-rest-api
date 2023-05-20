@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
@@ -51,10 +54,12 @@ public class Question {
     @JsonIgnore
     private Assessment assessment;
     // one-to-one relation between
-    @OneToOne(
+    @OneToMany(
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            fetch = FetchType.LAZY,
             mappedBy = "question",
             orphanRemoval = true
     )
     @JsonIgnore
-    private Answer answer;
+    private List<Answer> answers = new ArrayList<>();
 }
