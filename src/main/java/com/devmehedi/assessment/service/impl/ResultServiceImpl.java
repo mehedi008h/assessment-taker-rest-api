@@ -1,9 +1,10 @@
 package com.devmehedi.assessment.service.impl;
 
 import com.devmehedi.assessment.dto.QuestionDTO;
+import com.devmehedi.assessment.dto.ResultDTO;
 import com.devmehedi.assessment.exception.model.NotFoundException;
-import com.devmehedi.assessment.mapper.AssessmentMapper;
 import com.devmehedi.assessment.mapper.QuestionMapper;
+import com.devmehedi.assessment.mapper.ResultMapper;
 import com.devmehedi.assessment.model.*;
 import com.devmehedi.assessment.repository.*;
 import com.devmehedi.assessment.service.QuestionService;
@@ -13,6 +14,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,21 +31,22 @@ public class ResultServiceImpl implements ResultService {
     private ResultRepository resultRepository;
     private UserRepository userRepository;
     private QuestionService questionService;
-    private AssessmentMapper assessmentMapper;
+    private ResultMapper resultMapper;
     private QuestionMapper questionMapper;
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    public ResultServiceImpl(AssessmentRepository assessmentRepository, CategoryRepository categoryRepository, AnswerRepository answerRepository, ResultRepository resultRepository, UserRepository userRepository, QuestionService questionService, AssessmentMapper assessmentMapper, QuestionMapper questionMapper) {
+    public ResultServiceImpl(AssessmentRepository assessmentRepository, CategoryRepository categoryRepository, AnswerRepository answerRepository, ResultRepository resultRepository, UserRepository userRepository, QuestionService questionService, ResultMapper resultMapper,  QuestionMapper questionMapper) {
         this.assessmentRepository = assessmentRepository;
         this.categoryRepository = categoryRepository;
         this.answerRepository = answerRepository;
         this.resultRepository = resultRepository;
         this.userRepository = userRepository;
         this.questionService = questionService;
-        this.assessmentMapper = assessmentMapper;
+        this.resultMapper = resultMapper;
         this.questionMapper = questionMapper;
     }
+
     // eval assessment
     @Override
     public Result evalAssessment(List<QuestionDTO> questionDTOS, String assessmentIdentifier, String username) throws NotFoundException {
@@ -69,7 +74,7 @@ public class ResultServiceImpl implements ResultService {
                 correctAnswer++;
             }
         }
-        if(((marksGot * 100) / totalMark) > 90) {
+        if (((marksGot * 100) / totalMark) > 90) {
             user.setReward(user.getReward() + 1);
         }
         userRepository.save(user);
@@ -102,6 +107,18 @@ public class ResultServiceImpl implements ResultService {
         return result;
     }
 
+    // get single assessment leaderboard
+    @Override
+    public Page<ResultDTO> getLeaderBoardsOfAnAssessment(String assessmentIdentifier, int page, int size) throws NotFoundException {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Assessment assessment = checkAssessmentExist(assessmentIdentifier);
+        Page<Result> resultsPage = resultRepository.findResultByAssessmentOrderByMarkGot(assessment, pageRequest);
+        return new PageImpl<>(resultsPage.getContent()
+                .stream()
+                .map(result -> resultMapper.fromResult(result))
+                .collect(Collectors.toList()), pageRequest, resultsPage.getTotalElements());
+    }
+
     // check assessment exist or not
     private Assessment checkAssessmentExist(String assessmentIdentifier) throws NotFoundException {
         Assessment assessment = assessmentRepository.findAssessmentByAssessmentIdentifier(assessmentIdentifier);
@@ -115,7 +132,7 @@ public class ResultServiceImpl implements ResultService {
     // find user by username
     public User findUserByUsername(String username) throws NotFoundException {
         User user = userRepository.findUserByUsername(username);
-        if(user == null) {
+        if (user == null) {
             throw new NotFoundException("User not found with this username " + username);
         }
         return user;

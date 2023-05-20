@@ -3,7 +3,9 @@ package com.devmehedi.assessment.mapper;
 import com.devmehedi.assessment.dto.ResultDTO;
 import com.devmehedi.assessment.model.Result;
 import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ResultMapper {
     public ResultDTO fromResult(Result result) {
         ResultDTO resultDTO = new ResultDTO();
