@@ -1,6 +1,5 @@
 package com.devmehedi.assessment.controller;
 
-import com.devmehedi.assessment.dto.AssessmentDTO;
 import com.devmehedi.assessment.dto.QuestionDTO;
 import com.devmehedi.assessment.dto.ResultDTO;
 import com.devmehedi.assessment.exception.ExceptionHandling;
@@ -48,7 +47,7 @@ public class ResultController extends ExceptionHandling {
             @PathVariable String assessmentIdentifier,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "5") int size
-    ) {
+    ) throws NotFoundException {
         Page<ResultDTO> results = resultService.getLeaderBoardsOfAnAssessment(assessmentIdentifier, page, size);
         return new ResponseEntity<>(results, OK);
     }
